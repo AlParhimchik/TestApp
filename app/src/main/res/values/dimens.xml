@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="nav_height">150dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="image_height">120dp</dimen>
+    <dimen name="image_text_size">15dp</dimen>
+    <dimen name="comment_height">40dp</dimen>
+</resources>

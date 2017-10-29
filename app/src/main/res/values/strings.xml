@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">TestApp</string>
+
+    <!-- GLOBAL -->
+    <string name="error_close">CLOSE</string>
+    <string name="error_title">Error</string>
+    <string name="refresh">Refresh</string>
+    <string name="cancel">Cancel</string>
+    <string name="menu_item_logout">Logout</string>
+
+    <string name="progress_dialog_title">Downloading</string>
+    <string name="progress_dialog_message">Please wait..!</string>
+
+    <!--NETWORK-->
+    <string name="network_error">System error. Please try again later.</string>
+    <string name="network_no_internet_connection">No internet connection</string>
+    <string name="network_no_endpoint">The service is unavailable right now; please, try later</string>
+
+    <!-- Empty views  -->
+    <string name="empty_data">No data</string>
+    <string name="can_not_load_data">Data upload failed. Please, try later.</string>
+
+    <!-- OTHER  -->
+    <string name="close">close</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="confirmPassword">Confirm password</string>
+    <string name="loginBtn">Log in</string>
+    <string name="photoFolder">Image</string>
+    <string name="map_folder">Map</string>
+    <string name="openDrawer">Open</string>
+    <string name="closeDrawer">Close</string>
+    <string name="delete">delete</string>
+    <string name="signup_text">sign up</string>
+    <string name="NotNullError">field mustn\'t  be null</string>
+    <string name="ErrorLoginLength">\"size must be between 4 and 32\"</string>
+    <string name="ErrorPasswordLenght">size must be between 8 and 500</string>
+    <string name="ErrorMatchPassword">passwords must matches</string>
+</resources>
