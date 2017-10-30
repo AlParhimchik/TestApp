@@ -138,8 +138,18 @@ public class ImageInfoFragment extends AbsFragment {
 
     @Override
     public void onUpdateView(Object object) {
-        getComments();
+        if (object instanceof Comment) {
+            if (mComments.contains(object)) {
+                int index = mComments.indexOf(object);
+                mComments.remove(index);
+                mCommentAdapter.notifyItemRemoved(index);
+            } else {
 
+                mComments.add((Comment) object);
+                mCommentAdapter.notifyItemInserted(0);
+
+            }
+        }
     }
     public void loadComments(){
         ApiService.getInstance().getComments(id,0).enqueue(new Callback<GetCommentsResponse>() {
