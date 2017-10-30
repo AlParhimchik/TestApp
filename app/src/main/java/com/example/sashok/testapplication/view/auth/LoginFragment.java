@@ -11,9 +11,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 import com.example.sashok.testapplication.ApiService;
-import com.example.sashok.testapplication.App;
 import com.example.sashok.testapplication.R;
 import com.example.sashok.testapplication.network.model.ResponseConverter;
 import com.example.sashok.testapplication.network.model.auth.request.LoginRequest;
@@ -35,6 +35,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     private TextInputLayout login_layout;
     private TextInputLayout password_layout;
     private Button login_btn;
+    private ProgressBar mProgressBar;
     private AuthListener mAuthListener;
 
     @Nullable
@@ -48,6 +49,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         password_layout = (TextInputLayout) view.findViewById(R.id.password_layout);
 
         login_btn = (Button) view.findViewById(R.id.btn_login);
+        mProgressBar = view.findViewById(R.id.progress_bar);
         login_btn.setOnClickListener(this);
         return view;
     }
@@ -68,10 +70,11 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         if (validate()) {
-
+            startSigning();
             ApiService.getInstance().login(new LoginRequest(login_edittext.getText().toString(), password_edittext.getText().toString())).enqueue(new Callback<LoginResponse>() {
                 @Override
                 public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                    endSigning();
                     LoginResponse loginResponse = response.body();
                     if (loginResponse == null) {
                         loginResponse = (LoginResponse) ResponseConverter.convertErrorResponse(response.errorBody(), LoginResponse.class);
@@ -88,12 +91,23 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
                 @Override
                 public void onFailure(Call<LoginResponse> call, Throwable t) {
+                    endSigning();
                     if (t instanceof ConnectException)
                         mAuthListener.onAuthError("no internet connection");
                 }
             });
 
         }
+    }
+
+    public void startSigning() {
+        login_btn.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    public void endSigning() {
+        login_btn.setVisibility(View.VISIBLE);
+        mProgressBar.setVisibility(View.GONE);
     }
 
     public boolean validate() {

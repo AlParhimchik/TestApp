@@ -2,10 +2,10 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:focusable="true"
+    android:layout_height="match_parent"
     android:clickable="true"
-    android:focusableInTouchMode="true"
-    android:layout_height="match_parent">
+    android:focusable="true"
+    android:focusableInTouchMode="true">
 
     <LinearLayout
 
@@ -17,45 +17,63 @@
         android:orientation="vertical">
 
         <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
             android:id="@+id/login_layout"
+            android:layout_width="match_parent"
 
             android:layout_height="wrap_content">
 
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/login_edittext"
-                android:imeOptions="actionNext"
-
-                android:maxLines="1"
-                android:inputType="text"
                 android:layout_width="match_parent"
+
                 android:layout_height="wrap_content"
-                android:hint="@string/login"/>
+                android:hint="@string/login"
+                android:imeOptions="actionNext"
+                android:inputType="text"
+                android:maxLines="1"/>
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
             android:id="@+id/password_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/password_edittext"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:hint="@string/password"
                 android:imeOptions="actionDone"
-                android:inputType="textPassword"
-                android:hint="@string/password"/>
+                android:inputType="textPassword"/>
         </android.support.design.widget.TextInputLayout>
 
-        <Button
-            android:id="@+id/btn_login"
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/button_style"
-            android:text="@string/loginBtn"
-            android:textColor="@android:color/white"
-            android:textSize="18dp"/>
+            android:layout_height="wrap_content">
+
+
+            <Button
+                android:id="@+id/btn_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_centerInParent="true"
+                android:background="@drawable/button_style"
+                android:text="@string/loginBtn"
+                android:textColor="@android:color/white"
+                android:textSize="18dp"/>
+
+            <ProgressBar
+                android:layout_marginTop="20dp"
+                android:id="@+id/progress_bar"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+              />
+        </RelativeLayout>
+
     </LinearLayout>
 
 </RelativeLayout>

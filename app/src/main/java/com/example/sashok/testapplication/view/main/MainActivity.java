@@ -34,7 +34,6 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.example.sashok.testapplication.Abs.AbsFragment;
 import com.example.sashok.testapplication.Abs.AbsUtils;
 import com.example.sashok.testapplication.ApiService;
-import com.example.sashok.testapplication.App;
 import com.example.sashok.testapplication.R;
 import com.example.sashok.testapplication.model.Comment;
 import com.example.sashok.testapplication.model.Image;
@@ -106,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        userName= (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_name);
+        userName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_name);
         userName.setText(SessionManager.getLogin(this));
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -179,7 +178,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     final Image image = new Image();
                     image.setDate((int) (Calendar.getInstance().getTimeInMillis() / 1000));
                     final Location myLocation = LocationUtils.getLastBestLocation(MainActivity.this);
-                    AddImageRequest request = new AddImageRequest(encoded, image.getDate(), myLocation.getLatitude(), myLocation.getLongitude());
+
+                    AddImageRequest request = new AddImageRequest(encoded, (int) (Calendar.getInstance().getTimeInMillis() / 1000l), myLocation.getLatitude(), myLocation.getLongitude());
                     ApiService.getInstance().addImage(request).enqueue(new Callback<AddImageResponse>() {
                         @Override
                         public void onResponse(Call<AddImageResponse> call, Response<AddImageResponse> response) {
@@ -204,6 +204,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             Log.d(TAG, "onFailure: ");
                         }
                     });
+
+
                 }
             });
         }
@@ -365,6 +367,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onRestoreInstanceState(savedInstanceState);
         CURRENT_TAG = savedInstanceState.getParcelable(BUNDLE_CURRENT_TAG);
         cur_item = navigationView.getMenu().findItem(savedInstanceState.getInt(BUNDLE_ITEM_ID));
+        if (CURRENT_TAG == FragmentTag.TAG_IMAGE_INFO) {
+            setHomeButton(true);
+            fab.hide();
+        }
 
     }
 
@@ -387,7 +393,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onImageAdded(Image image) {
-        onDataSetChanged();
+        onDataSetChanged(image);
         if (CURRENT_TAG == FragmentTag.TAG_MAP) putMarkersOnMap();
     }
 
@@ -400,8 +406,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Log.d(TAG, "onResponse: ");
                 if (response.body() != null) {
                     if (response.body().status == 200) {
+                        onDataSetChanged(image);
                         RealmController.with(MainActivity.this).deleteImage(image);
-                        onDataSetChanged();
                     } else
                         Toast.makeText(MainActivity.this, response.body().error, Toast.LENGTH_LONG).show();
                 } else {
@@ -434,8 +440,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onResponse(Call<DeleteCommentResponse> call, Response<DeleteCommentResponse> response) {
                 if (response.body() != null) {
                     if (response.body().status == 200) {
+                        onDataSetChanged(comment);
                         RealmController.with(MainActivity.this).deleteComment(comment);
-                        onDataSetChanged();
                     }
                 }
             }
@@ -458,7 +464,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         Comment new_comment = new Comment(response.body().getData());
                         new_comment.setImageId(comment.getImageId());
                         RealmController.with(MainActivity.this).addComment(new_comment);
-                        onDataSetChanged();
+                        onDataSetChanged(comment);
                     }
                 }
             }
@@ -473,11 +479,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     @Override
-    public void onDataSetChanged() {
+    public void onDataSetChanged(Object object) {
         List<Fragment> fragments = getSupportFragmentManager().getFragments();
         for (Fragment fragment : fragments) {
             if (fragment instanceof AbsFragment) {
-                ((AbsFragment) fragment).onUpdateView();
+                ((AbsFragment) fragment).onUpdateView(object);
             }
         }
     }

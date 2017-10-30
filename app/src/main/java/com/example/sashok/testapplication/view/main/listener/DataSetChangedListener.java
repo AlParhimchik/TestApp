@@ -5,5 +5,5 @@ package com.example.sashok.testapplication.view.main.listener;
  */
 
 public interface DataSetChangedListener {
-    public void onDataSetChanged();
+    public void onDataSetChanged(Object object);
 }

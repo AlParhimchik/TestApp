@@ -137,7 +137,7 @@ public class ImageInfoFragment extends AbsFragment {
     }
 
     @Override
-    public void onUpdateView() {
+    public void onUpdateView(Object object) {
         getComments();
 
     }
@@ -167,6 +167,7 @@ public class ImageInfoFragment extends AbsFragment {
         mComments.clear();
         mComments.addAll(RealmController.with(getActivity()).getComments(mImage.getID()));
         mCommentAdapter.notifyDataSetChanged();
+        mRecyclerView.scrollToPosition(mComments.size()-1);
 
     }
 }

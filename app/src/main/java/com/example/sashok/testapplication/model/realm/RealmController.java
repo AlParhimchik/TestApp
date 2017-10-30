@@ -14,6 +14,9 @@ import java.util.List;
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmResults;
+import io.realm.Sort;
+
+import static com.example.sashok.testapplication.network.Constance.IMAGES_PER_PAGE;
 
 /**
  * Created by sashok on 27.10.17.
@@ -23,13 +26,14 @@ public class RealmController {
     private static RealmController instance;
     private final Realm realm;
     private Context mContext;
-    private int getCurrentUserId(){
+
+    private int getCurrentUserId() {
         return SessionManager.getUserId(mContext);
     }
 
     private RealmController(Application application) {
         realm = Realm.getDefaultInstance();
-        mContext=application;
+        mContext = application;
     }
 
     public static RealmController with(Activity activity) {
@@ -69,12 +73,12 @@ public class RealmController {
             @Override
             public void execute(Realm realm) {
                 image.setUserId(getCurrentUserId());
-                Image image1=realm.copyToRealmOrUpdate(image);
+                Image image1 = realm.copyToRealmOrUpdate(image);
             }
         });
     }
 
-    public void deleteAll(){
+    public void deleteAll() {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -84,14 +88,34 @@ public class RealmController {
             }
         });
     }
+
+    public List<Image> getImages(final int page) {
+        final List<Image> imageList = new RealmList<>();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                RealmResults<Image> images = realm.where(Image.class).equalTo("UserId", getCurrentUserId()).findAll().sort("ID", Sort.DESCENDING);
+                try {
+                    int max = images.size();
+                    int end = page * IMAGES_PER_PAGE + IMAGES_PER_PAGE;
+                    if (end > max) end = max;
+                    imageList.addAll(images.subList(page * IMAGES_PER_PAGE, end));
+                } catch (IndexOutOfBoundsException e) {
+
+                }
+
+            }
+        });
+        return imageList;
+    }
+
     public List<Image> getImages() {
         final List<Image> imageList = new RealmList<>();
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                RealmResults<Image> images = realm.where(Image.class).equalTo("UserId",getCurrentUserId()).findAll();
+                RealmResults<Image> images = realm.where(Image.class).equalTo("UserId", getCurrentUserId()).findAll();
                 imageList.addAll(images);
-
             }
         });
         return imageList;
@@ -101,7 +125,7 @@ public class RealmController {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                realm.where(Comment.class).equalTo("imageId",image.getID()).findAll().deleteAllFromRealm();
+                realm.where(Comment.class).equalTo("imageId", image.getID()).findAll().deleteAllFromRealm();
                 realm.where(Image.class).equalTo("ID", image.getID()).findFirst().deleteFromRealm();
             }
         });
@@ -123,19 +147,19 @@ public class RealmController {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-               Comment realmComment= realm.copyToRealmOrUpdate(comment);
-                realm.where(Image.class).equalTo("ID",realmComment.getImageId()).findFirst().setComment(realmComment);
+                Comment realmComment = realm.copyToRealmOrUpdate(comment);
+                realm.where(Image.class).equalTo("ID", realmComment.getImageId()).findFirst().setComment(realmComment);
 
             }
         });
     }
 
-    public List<Comment> getComments(final int imageId){
+    public List<Comment> getComments(final int imageId) {
         final List<Comment> commentList = new RealmList<>();
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                RealmResults<Comment> comments = realm.where(Comment.class).equalTo("imageId",imageId).findAll();
+                RealmResults<Comment> comments = realm.where(Comment.class).equalTo("imageId", imageId).findAll();
                 commentList.addAll(comments);
 
             }

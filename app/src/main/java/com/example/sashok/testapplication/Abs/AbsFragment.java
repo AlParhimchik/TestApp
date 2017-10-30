@@ -7,5 +7,5 @@ import android.support.v4.app.Fragment;
  */
 
 public abstract class AbsFragment extends Fragment {
-    public abstract void onUpdateView();
+    public abstract void onUpdateView(Object objectToUpdate);
 }

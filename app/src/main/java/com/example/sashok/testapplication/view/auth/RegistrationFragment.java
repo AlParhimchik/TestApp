@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 import com.example.sashok.testapplication.ApiService;
 import com.example.sashok.testapplication.R;
@@ -36,6 +37,7 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
     private TextInputLayout password_layout;
     private TextInputLayout confirm_password_layout;
     private Button signup_btn;
+    private ProgressBar mProgressBar;
     private AuthListener mAuthListener;
 
     @Nullable
@@ -48,7 +50,8 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
         login_layout = (TextInputLayout) view.findViewById(R.id.login_layout);
         password_layout = (TextInputLayout) view.findViewById(R.id.password_layout);
         confirm_password_layout = view.findViewById(R.id.password_confirm_layout);
-        signup_btn = view.findViewById(R.id.btn_login);
+        signup_btn = view.findViewById(R.id.btn_registration);
+        mProgressBar = view.findViewById(R.id.progress_bar);
         signup_btn.setOnClickListener(this);
         return view;
     }
@@ -89,10 +92,11 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
     @Override
     public void onClick(View view) {
         if (validate()) {
-
+            startSigning();
             ApiService.getInstance().registration(new RegistrationRequest(login_edittext.getText().toString(), password_edittext.getText().toString())).enqueue(new Callback<RegistrationResponse>() {
                 @Override
                 public void onResponse(Call<RegistrationResponse> call, Response<RegistrationResponse> response) {
+                    endSigning();
                     RegistrationResponse registrationResponse = response.body();
                     if (registrationResponse == null) {
                         registrationResponse = (RegistrationResponse) ResponseConverter.convertErrorResponse(response.errorBody(), RegistrationResponse.class);
@@ -109,6 +113,7 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
 
                 @Override
                 public void onFailure(Call<RegistrationResponse> call, Throwable t) {
+                    endSigning();
                     if (t instanceof ConnectException)
                         mAuthListener.onAuthError("no internet connection");
                 }
@@ -130,6 +135,17 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
         super.onAttach(context);
         mAuthListener = (AuthListener) context;
     }
+
+    public void startSigning() {
+        signup_btn.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    public void endSigning() {
+        signup_btn.setVisibility(View.VISIBLE);
+        mProgressBar.setVisibility(View.GONE);
+    }
+
 }
 
 
