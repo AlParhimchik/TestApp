@@ -4,6 +4,8 @@ import com.example.sashok.testapplication.model.Image;
 
 public interface ImageListener {
     public void onImageClicked(Image image);
+
     public void onImageAdded(Image image);
-    public void onImageLongClicked(Image image);
+
+    public void onImageDelete(Image image);
 }

@@ -4,7 +4,6 @@ import android.support.annotation.Nullable;
 
 import com.bluelinelabs.logansquare.annotation.JsonField;
 import com.bluelinelabs.logansquare.annotation.JsonObject;
-import com.example.sashok.testapplication.network.model.ErrorType;
 
 import java.io.Serializable;
 

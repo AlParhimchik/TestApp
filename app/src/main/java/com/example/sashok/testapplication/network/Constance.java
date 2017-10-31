@@ -7,6 +7,7 @@ package com.example.sashok.testapplication.network;
 public class Constance {
     public static final String AUTH = "account/";
     public static final String COMMENT = "/comment";
-    public static final String IMAGE="image";
-    public static final int IMAGES_PER_PAGE=20;
+    public static final String IMAGE = "image";
+    public static final int IMAGES_PER_PAGE = 20;
+    public static final int COMMENTS_PER_PAGE = 20;
 }

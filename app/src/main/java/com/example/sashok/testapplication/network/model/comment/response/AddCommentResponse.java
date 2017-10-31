@@ -3,7 +3,6 @@ package com.example.sashok.testapplication.network.model.comment.response;
 import com.bluelinelabs.logansquare.annotation.JsonObject;
 import com.example.sashok.testapplication.network.model.ObjectResponse;
 import com.example.sashok.testapplication.network.model.comment.CommentResponse;
-import com.example.sashok.testapplication.network.model.image.ImageResponse;
 
 import java.io.Serializable;
 

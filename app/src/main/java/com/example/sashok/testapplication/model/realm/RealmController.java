@@ -27,10 +27,6 @@ public class RealmController {
     private final Realm realm;
     private Context mContext;
 
-    private int getCurrentUserId() {
-        return SessionManager.getUserId(mContext);
-    }
-
     private RealmController(Application application) {
         realm = Realm.getDefaultInstance();
         mContext = application;
@@ -61,6 +57,10 @@ public class RealmController {
     public static RealmController getInstance() {
 
         return instance;
+    }
+
+    private int getCurrentUserId() {
+        return SessionManager.getUserId(mContext);
     }
 
     public Realm getRealm() {
@@ -167,6 +167,20 @@ public class RealmController {
         return commentList;
     }
 
+    public List<Comment> getComments(final int imageId, int page) {
+        final List<Comment> commentList = new RealmList<>();
+        RealmResults<Comment> comments = realm.where(Comment.class).equalTo("imageId", imageId).findAll().sort("ID", Sort.ASCENDING);
+        try {
+            int max = comments.size();
+            int end = page * IMAGES_PER_PAGE + IMAGES_PER_PAGE;
+            if (end > max) end = max;
+            commentList.addAll(comments.subList(page * IMAGES_PER_PAGE, end));
+        } catch (IndexOutOfBoundsException e) {
+
+        }
+        return commentList;
+    }
+
     public void deleteComment(final Comment comment) {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
@@ -174,6 +188,15 @@ public class RealmController {
                 Image image = realm.where(Image.class).equalTo("ID", comment.getImageId()).findFirst();
                 if (image != null) image.removeComment(comment);
                 realm.where(Comment.class).equalTo("ID", comment.getID()).findFirst().deleteFromRealm();
+            }
+        });
+    }
+
+    public void deleteComments(final int imageId) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.where(Comment.class).equalTo("imageId", imageId).findAll().deleteAllFromRealm();
             }
         });
     }

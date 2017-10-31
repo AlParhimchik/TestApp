@@ -10,6 +10,17 @@ import java.io.Serializable;
  */
 @JsonObject
 public class ImageResponse implements Serializable {
+    @JsonField
+    private int date;
+    @JsonField
+    private double lng;
+    @JsonField
+    private double lat;
+    @JsonField
+    private String url;
+    @JsonField
+    private int id;
+
     public int getDate() {
         return date;
     }
@@ -49,15 +60,4 @@ public class ImageResponse implements Serializable {
     public void setId(int id) {
         this.id = id;
     }
-
-    @JsonField
-    private int date;
-    @JsonField
-    private double lng;
-    @JsonField
-    private double lat;
-    @JsonField
-    private String url;
-    @JsonField
-    private int id;
 }

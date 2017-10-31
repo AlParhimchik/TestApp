@@ -2,8 +2,6 @@ package com.example.sashok.testapplication.model;
 
 import com.example.sashok.testapplication.network.model.image.ImageResponse;
 
-import java.util.List;
-
 import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -17,6 +15,21 @@ public class Image extends RealmObject {
     private int date;
     private double lat;
     private double lng;
+    private int UserId;
+    @PrimaryKey
+    private int ID;
+    private RealmList<Comment> mComments;
+    public Image() {
+        mComments = new RealmList<>();
+    }
+    public Image(ImageResponse imageResponse) {
+        mComments = new RealmList<>();
+        this.ID = imageResponse.getId();
+        this.lat = imageResponse.getLat();
+        this.lng = imageResponse.getLng();
+        this.date = imageResponse.getDate();
+        this.Url = imageResponse.getUrl();
+    }
 
     public int getUserId() {
         return UserId;
@@ -24,24 +37,6 @@ public class Image extends RealmObject {
 
     public void setUserId(int userId) {
         UserId = userId;
-    }
-
-    private int UserId;
-    @PrimaryKey
-    private int ID;
-    private RealmList<Comment> mComments;
-
-    public Image() {
-        mComments = new RealmList<>();
-    }
-
-    public Image(ImageResponse imageResponse){
-        mComments=new RealmList<>();
-        this.ID = imageResponse.getId();
-        this.lat=imageResponse.getLat();
-        this.lng=imageResponse.getLng();
-        this.date=imageResponse.getDate();
-        this.Url=imageResponse.getUrl();
     }
 
     public String getUrl() {
@@ -73,12 +68,12 @@ public class Image extends RealmObject {
         return mComments;
     }
 
-    public void setComment(Comment comment) {
-        if (!mComments.contains(comment)) mComments.add(comment);
+    public void setComments(RealmList<Comment> comments) {
+        this.mComments = comments;
     }
 
-    public void setComments(RealmList<Comment> comments) {
-        this.mComments=comments;
+    public void setComment(Comment comment) {
+        if (!mComments.contains(comment)) mComments.add(comment);
     }
 
     public double getLat() {

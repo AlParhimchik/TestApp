@@ -2,9 +2,6 @@ package com.example.sashok.testapplication.Abs;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -36,8 +33,8 @@ public class AbsUtils {
     }
 
 
-    public static  String getFormatTimeFromSec(int sec,String format){
-        long ms=sec*1000l;
+    public static String getFormatTimeFromSec(int sec, String format) {
+        long ms = sec * 1000l;
         return new SimpleDateFormat(format).format(new Date(ms));
     }
 

@@ -1,6 +1,5 @@
 package com.example.sashok.testapplication.network.model.auth.response;
 
-import com.bluelinelabs.logansquare.annotation.JsonField;
 import com.bluelinelabs.logansquare.annotation.JsonObject;
 import com.example.sashok.testapplication.network.model.ObjectResponse;
 import com.example.sashok.testapplication.network.model.auth.UserResponse;

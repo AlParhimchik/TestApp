@@ -15,15 +15,11 @@ import android.widget.ProgressBar;
 
 import com.example.sashok.testapplication.ApiService;
 import com.example.sashok.testapplication.R;
-import com.example.sashok.testapplication.network.model.ResponseConverter;
+import com.example.sashok.testapplication.network.ResponseCallBack;
 import com.example.sashok.testapplication.network.model.auth.request.LoginRequest;
 import com.example.sashok.testapplication.network.model.auth.response.LoginResponse;
 
 import java.net.ConnectException;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Created by sashok on 26.10.17.
@@ -37,6 +33,13 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     private Button login_btn;
     private ProgressBar mProgressBar;
     private AuthListener mAuthListener;
+
+    public static LoginFragment newInstance() {
+
+        LoginFragment fragment = new LoginFragment();
+
+        return fragment;
+    }
 
     @Nullable
     @Override
@@ -60,43 +63,30 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         mAuthListener = (AuthListener) getActivity();
     }
 
-    public static LoginFragment newInstance() {
-
-        LoginFragment fragment = new LoginFragment();
-
-        return fragment;
-    }
-
     @Override
     public void onClick(View view) {
         if (validate()) {
             startSigning();
-            ApiService.getInstance().login(new LoginRequest(login_edittext.getText().toString(), password_edittext.getText().toString())).enqueue(new Callback<LoginResponse>() {
+            ApiService.getInstance().login(new LoginRequest(login_edittext.getText().toString(), password_edittext.getText().toString()), new ResponseCallBack<LoginResponse>() {
                 @Override
-                public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                    endSigning();
-                    LoginResponse loginResponse = response.body();
-                    if (loginResponse == null) {
-                        loginResponse = (LoginResponse) ResponseConverter.convertErrorResponse(response.errorBody(), LoginResponse.class);
-                    }
+                public void onResponse(LoginResponse loginResponse) {
                     switch (loginResponse.status) {
                         case 200:
                             mAuthListener.onAuthSuccess(loginResponse.getData());
                             break;
                         default:
+                            endSigning();
                             mAuthListener.onAuthError(loginResponse.getErrorMessage());
                     }
-
                 }
 
                 @Override
-                public void onFailure(Call<LoginResponse> call, Throwable t) {
+                public void onError(Throwable t) {
                     endSigning();
                     if (t instanceof ConnectException)
                         mAuthListener.onAuthError("no internet connection");
                 }
             });
-
         }
     }
 

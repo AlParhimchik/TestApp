@@ -24,24 +24,23 @@ import com.example.sashok.testapplication.view.main.listener.LoadLoreListener;
 
 import java.util.List;
 
-import static com.example.sashok.testapplication.network.Constance.IMAGES_PER_PAGE;
-
 /**
  * Created by sashok on 27.10.17.
  */
 
 public class ImageAdapter extends RecyclerView.Adapter {
 
+    private final int VIEW_ITEM = 1;
+    private final int VIEW_PROG = 0;
     private Context mContext;
     private List<Image> mImageList;
     private ImageListener mImageListener;
     private LoadLoreListener mLoadLoreListener;
     private RecyclerView mRecyclerView;
     private boolean loading;
-    private  int progressPos;
+    private int progressPos;
     private boolean isLastPage;
-    private final int VIEW_ITEM = 1;
-    private final int VIEW_PROG = 0;
+
     public ImageAdapter(RecyclerView recyclerView, final List<Image> mImageList, Context context) {
         this.mRecyclerView = recyclerView;
         this.mImageList = mImageList;
@@ -50,11 +49,11 @@ public class ImageAdapter extends RecyclerView.Adapter {
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView,newState);
-                if (newState==RecyclerView.SCROLL_STATE_IDLE){
-                    GridLayoutManager gridLayoutManager= (GridLayoutManager) recyclerView.getLayoutManager();
-                    if (0==0){
-                        if (!loading && gridLayoutManager.findLastCompletelyVisibleItemPosition() == mImageList.size() - 1&&!isLastPage) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    GridLayoutManager gridLayoutManager = (GridLayoutManager) recyclerView.getLayoutManager();
+                    if (0 == 0) {
+                        if (!loading && gridLayoutManager.findLastCompletelyVisibleItemPosition() == mImageList.size() - 1 && !isLastPage) {
                             mLoadLoreListener.onLoadMore();
                             loading = true;
                             mImageList.add(null);
@@ -81,17 +80,16 @@ public class ImageAdapter extends RecyclerView.Adapter {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
         RecyclerView.ViewHolder viewHolder;
-        if (viewType==VIEW_ITEM) {
+        if (viewType == VIEW_ITEM) {
             View contactView = inflater.inflate(R.layout.image_item, parent, false);
 
             // Return a new holder instance
             viewHolder = new ImageHolder(contactView);
-        }
-        else  {
+        } else {
             View v = LayoutInflater.from(parent.getContext()).inflate(
                     R.layout.progressbar, parent, false);
 
-             viewHolder = new ProgressBarViewHolder(v);
+            viewHolder = new ProgressBarViewHolder(v);
         }
         return viewHolder;
     }
@@ -100,7 +98,7 @@ public class ImageAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         final Image cur_image = mImageList.get(position);
         if (holder instanceof ImageHolder) {
-            ImageHolder imageHolder=(ImageHolder)holder;
+            ImageHolder imageHolder = (ImageHolder) holder;
             imageHolder.image_name.setText(AbsUtils.getFormatTimeFromSec(cur_image.getDate(), "dd.MM.yyyy"));
             Glide.with(mContext).load(cur_image.getUrl()).thumbnail(0.1f).dontAnimate().diskCacheStrategy(DiskCacheStrategy.ALL).error(R.drawable.default_image).into(imageHolder.image);
 
@@ -117,14 +115,14 @@ public class ImageAdapter extends RecyclerView.Adapter {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             if (mImageListener != null)
-                                mImageListener.onImageLongClicked(cur_image);
+                                mImageListener.onImageDelete(cur_image);
                         }
                     });
                     return true;
                 }
             });
         }
-        if (holder instanceof ProgressBarViewHolder){
+        if (holder instanceof ProgressBarViewHolder) {
 
             ((ProgressBarViewHolder) holder).mProgressBar.setIndeterminate(true);
         }
@@ -141,16 +139,16 @@ public class ImageAdapter extends RecyclerView.Adapter {
         mLoadLoreListener = loadLoreListener;
     }
 
+    public boolean isLoading() {
+        return loading;
+    }
+
     public void setLoading(boolean loading) {
-       mImageList.remove(progressPos);
+        mImageList.remove(progressPos);
         notifyItemRemoved(progressPos);
 //        if (progressPos == IMAGES_PER_PAGE) progressPos = 0;
 //        notifyItemRemoved(progressPos);
         this.loading = loading;
-    }
-
-    public boolean isLoading(){
-        return loading;
     }
 
     public boolean isLastPage() {
@@ -159,33 +157,6 @@ public class ImageAdapter extends RecyclerView.Adapter {
 
     public void setLastPage(boolean lastPage) {
         isLastPage = lastPage;
-    }
-
-    public class ImageHolder extends RecyclerView.ViewHolder {
-        private TextView image_name;
-        private ImageView image;
-        private CardView cardView;
-
-        public ImageHolder(View itemView) {
-            super(itemView);
-            cardView = (CardView) itemView.findViewById(R.id.card_view);
-            image_name = (TextView) itemView.findViewById(R.id.folder_name);
-            image = (ImageView) itemView.findViewById(R.id.folder_image);
-        }
-    }
-
-    public static class ProgressBarViewHolder extends RecyclerView.ViewHolder {
-
-
-        public ProgressBar mProgressBar;
-        public LinearLayout container;
-
-        public ProgressBarViewHolder(View v) {
-            super(v);
-            container = v.findViewById(R.id.container);
-            mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
-
-        }
     }
 
     public void createConfirmDialog(String title, final DialogInterface.OnClickListener positiveListener) {
@@ -206,6 +177,33 @@ public class ImageAdapter extends RecyclerView.Adapter {
                 })
                 .create();
         builder.show();
+    }
+
+    public static class ProgressBarViewHolder extends RecyclerView.ViewHolder {
+
+
+        public ProgressBar mProgressBar;
+        public LinearLayout container;
+
+        public ProgressBarViewHolder(View v) {
+            super(v);
+            container = v.findViewById(R.id.container);
+            mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
+
+        }
+    }
+
+    public class ImageHolder extends RecyclerView.ViewHolder {
+        private TextView image_name;
+        private ImageView image;
+        private CardView cardView;
+
+        public ImageHolder(View itemView) {
+            super(itemView);
+            cardView = (CardView) itemView.findViewById(R.id.card_view);
+            image_name = (TextView) itemView.findViewById(R.id.folder_name);
+            image = (ImageView) itemView.findViewById(R.id.folder_image);
+        }
     }
 
 

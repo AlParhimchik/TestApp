@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/view_container"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/nav_height"
-                android:gravity="bottom"
                 android:background="@color/primary"
+                android:gravity="bottom"
                 android:orientation="vertical"
                 android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
     <TextView
-        android:textColor="@android:color/white"
-        android:textSize="18dp"
         android:id="@+id/user_name"
-        android:text="Username"
-        android:layout_margin="25dp"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_height="wrap_content"/>
+        android:layout_margin="25dp"
+        android:text="Username"
+        android:textColor="@android:color/white"
+        android:textSize="18dp"/>
 </RelativeLayout>

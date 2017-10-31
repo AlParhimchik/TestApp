@@ -8,18 +8,6 @@ import com.bluelinelabs.logansquare.annotation.JsonObject;
  */
 @JsonObject
 public class UserResponse {
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
     @JsonField
     private String login;
     @JsonField
@@ -27,16 +15,27 @@ public class UserResponse {
     @JsonField
     private String token;
 
-
     public String getLogin() {
         return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
     }
 
     public String getToken() {
         return token;
     }
 
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     public Integer getUserId() {
         return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 }

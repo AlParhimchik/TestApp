@@ -16,6 +16,8 @@ public class AddImageRequest extends Request {
     private double lat;
     @JsonField
     private double lng;
+    @JsonField
+    private int date;
 
     public AddImageRequest(String base64Image, int date, double lat, double lng) {
         this.base64Image = base64Image;
@@ -24,8 +26,8 @@ public class AddImageRequest extends Request {
         this.date = date;
     }
 
-    @JsonField
-    private int date;
+    public AddImageRequest() {
+    }
 
     public String getBase64Image() {
         return base64Image;
@@ -57,9 +59,6 @@ public class AddImageRequest extends Request {
 
     public void setDate(int date) {
         this.date = date;
-    }
-
-    public AddImageRequest() {
     }
 
 

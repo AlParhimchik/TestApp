@@ -13,11 +13,22 @@ public enum FragmentTag implements Parcelable {
     TAG_MAP("TAG_MAP"),
     TAG_IMAGE_INFO("TAG_IMAGE_INFO");
 
+    public static final Creator<FragmentTag> CREATOR = new Creator<FragmentTag>() {
+        @Override
+        public FragmentTag createFromParcel(Parcel in) {
+            return FragmentTag.values()[in.readInt()];
+        }
+
+        @Override
+        public FragmentTag[] newArray(int size) {
+            return new FragmentTag[size];
+        }
+    };
+    private String fragmentName;
+
     private FragmentTag(String name) {
         fragmentName = name;
     }
-
-    private String fragmentName;
 
     public FragmentTag fromString(String tag) {
         return FragmentTag.valueOf(tag);
@@ -36,16 +47,4 @@ public enum FragmentTag implements Parcelable {
     public int describeContents() {
         return 0;
     }
-
-    public static final Creator<FragmentTag> CREATOR = new Creator<FragmentTag>() {
-        @Override
-        public FragmentTag createFromParcel(Parcel in) {
-            return FragmentTag.values()[in.readInt()];
-        }
-
-        @Override
-        public FragmentTag[] newArray(int size) {
-            return new FragmentTag[size];
-        }
-    };
 }

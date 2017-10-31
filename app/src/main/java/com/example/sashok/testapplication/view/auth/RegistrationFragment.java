@@ -15,15 +15,11 @@ import android.widget.ProgressBar;
 
 import com.example.sashok.testapplication.ApiService;
 import com.example.sashok.testapplication.R;
-import com.example.sashok.testapplication.network.model.ResponseConverter;
+import com.example.sashok.testapplication.network.ResponseCallBack;
 import com.example.sashok.testapplication.network.model.auth.request.RegistrationRequest;
 import com.example.sashok.testapplication.network.model.auth.response.RegistrationResponse;
 
 import java.net.ConnectException;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Created by sashok on 26.10.17.
@@ -39,6 +35,13 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
     private Button signup_btn;
     private ProgressBar mProgressBar;
     private AuthListener mAuthListener;
+
+    public static RegistrationFragment newInstance() {
+
+        RegistrationFragment fragment = new RegistrationFragment();
+
+        return fragment;
+    }
 
     @Nullable
     @Override
@@ -93,41 +96,27 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
     public void onClick(View view) {
         if (validate()) {
             startSigning();
-            ApiService.getInstance().registration(new RegistrationRequest(login_edittext.getText().toString(), password_edittext.getText().toString())).enqueue(new Callback<RegistrationResponse>() {
+            ApiService.getInstance().registration(new RegistrationRequest(login_edittext.getText().toString(), password_edittext.getText().toString()), new ResponseCallBack<RegistrationResponse>() {
                 @Override
-                public void onResponse(Call<RegistrationResponse> call, Response<RegistrationResponse> response) {
-                    endSigning();
-                    RegistrationResponse registrationResponse = response.body();
-                    if (registrationResponse == null) {
-                        registrationResponse = (RegistrationResponse) ResponseConverter.convertErrorResponse(response.errorBody(), RegistrationResponse.class);
-                    }
+                public void onResponse(RegistrationResponse registrationResponse) {
                     switch (registrationResponse.status) {
                         case 200:
                             mAuthListener.onAuthSuccess(registrationResponse.getData());
                             break;
                         default:
+                            endSigning();
                             mAuthListener.onAuthError(registrationResponse.getErrorMessage());
                     }
-
                 }
 
                 @Override
-                public void onFailure(Call<RegistrationResponse> call, Throwable t) {
+                public void onError(Throwable t) {
                     endSigning();
                     if (t instanceof ConnectException)
                         mAuthListener.onAuthError("no internet connection");
                 }
             });
-
         }
-    }
-
-
-    public static RegistrationFragment newInstance() {
-
-        RegistrationFragment fragment = new RegistrationFragment();
-
-        return fragment;
     }
 
     @Override

@@ -7,8 +7,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 
-import com.example.sashok.testapplication.model.Image;
-
 /**
  * Created by sashok on 28.10.17.
  */
@@ -42,5 +40,5 @@ public class LocationUtils {
         }
     }
 
-    }
+}
 

@@ -1,7 +1,6 @@
 package com.example.sashok.testapplication.view.main.listener;
 
 import com.example.sashok.testapplication.model.Comment;
-import com.example.sashok.testapplication.model.Image;
 
 /**
  * Created by sashok on 27.10.17.

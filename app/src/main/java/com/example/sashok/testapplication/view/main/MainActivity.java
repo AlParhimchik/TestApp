@@ -38,11 +38,10 @@ import com.example.sashok.testapplication.R;
 import com.example.sashok.testapplication.model.Comment;
 import com.example.sashok.testapplication.model.Image;
 import com.example.sashok.testapplication.model.realm.RealmController;
-import com.example.sashok.testapplication.network.model.ResponseConverter;
+import com.example.sashok.testapplication.network.ResponseCallBack;
 import com.example.sashok.testapplication.network.model.comment.request.AddCommentRequest;
 import com.example.sashok.testapplication.network.model.comment.response.AddCommentResponse;
 import com.example.sashok.testapplication.network.model.comment.response.DeleteCommentResponse;
-import com.example.sashok.testapplication.network.model.image.ImageResponse;
 import com.example.sashok.testapplication.network.model.image.request.AddImageRequest;
 import com.example.sashok.testapplication.network.model.image.response.AddImageResponse;
 import com.example.sashok.testapplication.network.model.image.response.DeleteImageResponse;
@@ -63,38 +62,30 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Converter;
-import retrofit2.Response;
-
 /**
  * Created by sashok on 26.10.17.
  */
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ImageListener, ImageInfoListener, DataSetChangedListener, OnMapReadyCallback {
-    private Toolbar toolbar;
-    private FragmentTag CURRENT_TAG;
+    private static final int REQUEST_CODE = 1;
     private static String BUNDLE_ITEM_ID = "BUNDLE_ITEM_ID";
     private static String BUNDLE_CURRENT_TAG = "cur_tag";
-
     private static String TAG = "TAG_MAIN_ACTIVITY";
     private static MenuItem cur_item;
+    private Toolbar toolbar;
+    private FragmentTag CURRENT_TAG;
     private DrawerLayout drawerLayout;
     private FloatingActionButton fab;
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private NavigationView navigationView;
     private TextView userName;
     private GoogleMap mMap;
-    private static final int REQUEST_CODE = 1;
     private Bitmap bitmap;
     private String mCurrentPhotoPath;
 
@@ -180,32 +171,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     final Location myLocation = LocationUtils.getLastBestLocation(MainActivity.this);
 
                     AddImageRequest request = new AddImageRequest(encoded, (int) (Calendar.getInstance().getTimeInMillis() / 1000l), myLocation.getLatitude(), myLocation.getLongitude());
-                    ApiService.getInstance().addImage(request).enqueue(new Callback<AddImageResponse>() {
+                    ApiService.getInstance().addImage(request, new ResponseCallBack<AddImageResponse>() {
                         @Override
-                        public void onResponse(Call<AddImageResponse> call, Response<AddImageResponse> response) {
-                            AddImageResponse addImageResponse = response.body();
-                            if (addImageResponse == null) {
-                                addImageResponse = (AddImageResponse) ResponseConverter.convertErrorResponse(response.errorBody(), AddImageResponse.class);
-                            }
-                            if (addImageResponse.status == 200) {
-                                ImageResponse imageResponse = response.body().getData();
-                                Image image1 = new Image(imageResponse);
-                                RealmController.with(MainActivity.this).addImage(image1);
-                                onImageAdded(image1);
-                            }
-                            if (addImageResponse.status == 400) {
-                                Toast.makeText(MainActivity.this, "too big image", Toast.LENGTH_LONG).show();
-                            }
+                        public void onResponse(AddImageResponse addImageResponse) {
+                            switch (addImageResponse.status) {
+                                case 200: {
+                                    Image image1 = new Image(addImageResponse.getData());
+                                    RealmController.with(MainActivity.this).addImage(image1);
+                                    onImageAdded(image1);
+                                    break;
+                                }
+                                case 400: {
+                                    Toast.makeText(MainActivity.this, "too big image", Toast.LENGTH_LONG).show();
+                                    break;
+                                }
+                                default: {
 
+                                }
+                            }
                         }
 
                         @Override
-                        public void onFailure(Call<AddImageResponse> call, Throwable t) {
-                            Log.d(TAG, "onFailure: ");
+                        public void onError(Throwable t) {
+
                         }
                     });
-
-
                 }
             });
         }
@@ -398,85 +388,92 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onImageLongClicked(final Image image) {
-        Log.d(TAG, "onImageLongClicked: ");
-        ApiService.getInstance().deleteImage(image.getID()).enqueue(new Callback<DeleteImageResponse>() {
+    public void onImageDelete(final Image image) {
+        Log.d(TAG, "onImageDelete: ");
+        ApiService.getInstance().deleteImage(image.getID(), new ResponseCallBack<DeleteImageResponse>() {
             @Override
-            public void onResponse(Call<DeleteImageResponse> call, Response<DeleteImageResponse> response) {
-                Log.d(TAG, "onResponse: ");
-                if (response.body() != null) {
-                    if (response.body().status == 200) {
+            public void onResponse(DeleteImageResponse deleteImageResponse) {
+                switch (deleteImageResponse.status) {
+                    case 200: {
                         onDataSetChanged(image);
                         RealmController.with(MainActivity.this).deleteImage(image);
-                    } else
-                        Toast.makeText(MainActivity.this, response.body().error, Toast.LENGTH_LONG).show();
-                } else {
-                    Converter<ResponseBody, DeleteImageResponse> errorConverter =
-                            ApiService.getRetrofit().responseBodyConverter(DeleteImageResponse.class, new Annotation[0]);
-                    try {
-                        DeleteImageResponse error = errorConverter.convert(response.errorBody());
-                        Log.d(TAG, "onResponse: ");
-                        if (error.status == 500)
-                            Toast.makeText(MainActivity.this, "Can't delete this photo", Toast.LENGTH_LONG).show();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        break;
+
+                    }
+                    case 500: {
+                        Toast.makeText(MainActivity.this, "Can't delete this photo", Toast.LENGTH_LONG).show();
+                        break;
+                    }
+                    default: {
+                        Toast.makeText(MainActivity.this, deleteImageResponse.error, Toast.LENGTH_LONG).show();
                     }
                 }
-
             }
 
             @Override
-            public void onFailure(Call<DeleteImageResponse> call, Throwable t) {
-                Log.d(TAG, "onFailure: ");
+            public void onError(Throwable t) {
+
             }
         });
+
     }
 
     @Override
     public void onCommentDelete(final Comment comment) {
         Log.d(TAG, "onCommentDelete: ");
-        ApiService.getInstance().deleteComment(comment.getImageId(), comment.getID()).enqueue(new Callback<DeleteCommentResponse>() {
+        ApiService.getInstance().deleteComment(comment.getImageId(), comment.getID(), new ResponseCallBack<DeleteCommentResponse>() {
             @Override
-            public void onResponse(Call<DeleteCommentResponse> call, Response<DeleteCommentResponse> response) {
-                if (response.body() != null) {
-                    if (response.body().status == 200) {
+            public void onResponse(DeleteCommentResponse deleteCommentResponse) {
+                switch (deleteCommentResponse.status) {
+                    case 200: {
                         onDataSetChanged(comment);
                         RealmController.with(MainActivity.this).deleteComment(comment);
+                        break;
+                    }
+                    case 404:
+                        Toast.makeText(MainActivity.this, "Not found", Toast.LENGTH_LONG).show();
+                        break;
+                    default: {
+
                     }
                 }
             }
 
             @Override
-            public void onFailure(Call<DeleteCommentResponse> call, Throwable t) {
+            public void onError(Throwable t) {
 
             }
         });
+
+
     }
 
     @Override
     public void onCommentAdded(final Comment comment) {
         Log.d(TAG, "onCommentAdded: ");
-        ApiService.getInstance().addComment(comment.getImageId(), new AddCommentRequest(comment.getText())).enqueue(new Callback<AddCommentResponse>() {
+        ApiService.getInstance().addComment(comment.getImageId(), new AddCommentRequest(comment.getText()), new ResponseCallBack<AddCommentResponse>() {
             @Override
-            public void onResponse(Call<AddCommentResponse> call, Response<AddCommentResponse> response) {
-                if (response.body() != null) {
-                    if (response.body().status == 200) {
-                        Comment new_comment = new Comment(response.body().getData());
+            public void onResponse(AddCommentResponse addCommentResponse) {
+                switch (addCommentResponse.status) {
+                    case 200: {
+                        Comment new_comment = new Comment(addCommentResponse.getData());
                         new_comment.setImageId(comment.getImageId());
                         RealmController.with(MainActivity.this).addComment(new_comment);
-                        onDataSetChanged(comment);
+                        onDataSetChanged(new_comment);
+                        break;
+                    }
+                    default: {
+
                     }
                 }
             }
 
             @Override
-            public void onFailure(Call<AddCommentResponse> call, Throwable t) {
+            public void onError(Throwable t) {
 
             }
         });
-
     }
-
 
     @Override
     public void onDataSetChanged(Object object) {

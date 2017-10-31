@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right|bottom"
             android:layout_margin="@dimen/fab_margin"
-            android:src="@drawable/ic_add_button_white" />
+            android:src="@drawable/ic_add_button_white"/>
 
     </android.support.design.widget.CoordinatorLayout>
 

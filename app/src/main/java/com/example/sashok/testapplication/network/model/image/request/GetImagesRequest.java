@@ -4,9 +4,6 @@ import com.bluelinelabs.logansquare.annotation.JsonField;
 import com.bluelinelabs.logansquare.annotation.JsonObject;
 import com.example.sashok.testapplication.network.model.Request;
 
-import retrofit2.http.QueryMap;
-import retrofit2.http.QueryName;
-
 /**
  * Created by sashok on 28.10.17.
  */

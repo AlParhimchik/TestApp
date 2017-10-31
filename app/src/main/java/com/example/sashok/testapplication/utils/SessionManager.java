@@ -17,10 +17,6 @@ public class SessionManager {
     private static String IS_LOGIN = "is_login";
     private UserResponse user;
 
-    public void createLoginSession(UserResponse user) {
-        this.user = user;
-    }
-
     public SessionManager(Context context) {
 
     }
@@ -66,5 +62,9 @@ public class SessionManager {
         SharedPreferences sharedPref = context.getSharedPreferences(fileName
                 , Context.MODE_PRIVATE);
         return sharedPref.getString(LOGIN_TOKEN, "");
+    }
+
+    public void createLoginSession(UserResponse user) {
+        this.user = user;
     }
 }

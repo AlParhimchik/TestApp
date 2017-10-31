@@ -9,33 +9,34 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.sashok.testapplication.Abs.AbsFragment;
 import com.example.sashok.testapplication.Abs.AbsUtils;
 import com.example.sashok.testapplication.ApiService;
-import com.example.sashok.testapplication.App;
 import com.example.sashok.testapplication.R;
 import com.example.sashok.testapplication.model.Comment;
 import com.example.sashok.testapplication.model.Image;
 import com.example.sashok.testapplication.model.realm.RealmController;
+import com.example.sashok.testapplication.network.ResponseCallBack;
 import com.example.sashok.testapplication.network.model.comment.CommentResponse;
 import com.example.sashok.testapplication.network.model.comment.response.GetCommentsResponse;
 import com.example.sashok.testapplication.view.main.adapter.CommentAdapter;
 import com.example.sashok.testapplication.view.main.listener.ImageInfoListener;
+import com.example.sashok.testapplication.view.main.listener.LoadLoreListener;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
-import io.realm.Realm;
-import io.realm.RealmChangeListener;
-import io.realm.RealmList;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import static com.example.sashok.testapplication.network.Constance.COMMENTS_PER_PAGE;
 
 /**
  * Created by sashok on 27.10.17.
@@ -55,28 +56,26 @@ public class ImageInfoFragment extends AbsFragment {
     private TextView imageDate;
     private ImageInfoListener mImageInfoListener;
     private RealmController mRealmController;
+    private int cur_page;
+
+    public static ImageInfoFragment newInstance(int id) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(BUNDLE_IMAGE_ID, id);
+        ImageInfoFragment fragment = new ImageInfoFragment();
+        fragment.setArguments(bundle);
+        return fragment;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mComments = new RealmList<>();
+        mComments = new ArrayList<>();
         mImageInfoListener = (ImageInfoListener) getActivity();
         if (getArguments() != null) {
             id = getArguments().getInt(BUNDLE_IMAGE_ID);
         }
         mRealmController = RealmController.with(getActivity());
-        mRealmController.getRealm().addChangeListener(new RealmChangeListener<Realm>() {
-            @Override
-            public void onChange(Realm realm) {
-                Log.d("TAG", "gsef");
-            }
-        });
-        loadData();
-    }
 
-    private void loadData() {
-        mImage = RealmController.with(getActivity()).getImageById(id);
-        loadComments();
     }
 
     @Nullable
@@ -85,12 +84,35 @@ public class ImageInfoFragment extends AbsFragment {
         View view = inflater.inflate(R.layout.image_info_fragment, container, false);
         init(view);
         setListeners();
-        imageDate.setText(AbsUtils.getFormatTimeFromSec(mImage.getDate(), "dd.MM.yyyy"));
-        Glide.with(getActivity()).load(mImage.getUrl()).thumbnail(0.1f).error(R.drawable.default_image).dontAnimate().into(mImageView);
+        mImage = RealmController.with(getActivity()).getImageById(id);
+        imageDate.setText(new SimpleDateFormat("dd.MM.yyyy").format(new Date(mImage.getDate() * 1000l)));
+        Glide.with(getActivity()).load(mImage.getUrl()).centerCrop().thumbnail(0.1f).error(R.drawable.default_image).dontAnimate().into(mImageView);
+        if (savedInstanceState == null) {
+            cur_page = 0;
+            loadComments();
+        } else {
+            getComments();
+        }
+
         return view;
     }
 
     public void init(View view) {
+
+        final ScrollView scrollview = view.findViewById(R.id.scroll_view);
+        if (scrollview != null)
+            scrollview.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+                @Override
+                public void onScrollChanged() {
+                    if (scrollview != null && mRecyclerView.getChildCount() > 0) {
+                        if (scrollview.getChildAt(0).getBottom() <= (mRecyclerView.getChildAt(0).getHeight() / 2 + scrollview.getHeight() + scrollview.getScrollY())) {
+                            Log.d("TAG", "onScrollChanged: ");
+                            mCommentAdapter.onSrollChanged();
+                            //scroll view is at bottom
+                        }
+                    }
+                }
+            });
         mImageView = view.findViewById(R.id.image_view);
         sendBtn = view.findViewById(R.id.send_btn);
         mEditText = view.findViewById(R.id.edit_text);
@@ -98,8 +120,16 @@ public class ImageInfoFragment extends AbsFragment {
         imageDate = view.findViewById(R.id.image_text);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mLayoutManager = new LinearLayoutManager(getActivity());
+        mLayoutManager.setAutoMeasureEnabled(true);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mCommentAdapter = new CommentAdapter(getActivity(), mComments);
+        mRecyclerView.setNestedScrollingEnabled(false);
+        mCommentAdapter = new CommentAdapter(mRecyclerView, getActivity(), mComments);
+        mCommentAdapter.setLoadLoreListener(new LoadLoreListener() {
+            @Override
+            public void onLoadMore() {
+                loadComments();
+            }
+        });
         mRecyclerView.setAdapter(mCommentAdapter);
     }
 
@@ -128,14 +158,6 @@ public class ImageInfoFragment extends AbsFragment {
         mRealmController.getRealm().removeAllChangeListeners();
     }
 
-    public static ImageInfoFragment newInstance(int id) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(BUNDLE_IMAGE_ID, id);
-        ImageInfoFragment fragment = new ImageInfoFragment();
-        fragment.setArguments(bundle);
-        return fragment;
-    }
-
     @Override
     public void onUpdateView(Object object) {
         if (object instanceof Comment) {
@@ -144,40 +166,53 @@ public class ImageInfoFragment extends AbsFragment {
                 mComments.remove(index);
                 mCommentAdapter.notifyItemRemoved(index);
             } else {
-
-                mComments.add((Comment) object);
-                mCommentAdapter.notifyItemInserted(0);
+                if (mCommentAdapter.isLastPage() == true)
+                    mComments.add((Comment) object);
+                mCommentAdapter.notifyItemInserted(mComments.size() - 1);
+                mRecyclerView.scrollToPosition(mComments.size() - 1);
 
             }
         }
     }
-    public void loadComments(){
-        ApiService.getInstance().getComments(id,0).enqueue(new Callback<GetCommentsResponse>() {
+
+    public void loadComments() {
+        ApiService.getInstance().getComments(id, cur_page, new ResponseCallBack<GetCommentsResponse>() {
             @Override
-            public void onResponse(Call<GetCommentsResponse> call, Response<GetCommentsResponse> response) {
-                if (response.body()==null) getComments();
-                else {
-                    for (CommentResponse commentResponse: response.body().getData()
-                         ) {
-                        Comment comment=new Comment(commentResponse);
-                        comment.setImageId(id);
-                        RealmController.with(getActivity()).addComment(comment);
+            public void onResponse(GetCommentsResponse getCommentsResponse) {
+                switch (getCommentsResponse.status) {
+                    case 200: {
+                        if (cur_page == 0) mRealmController.deleteComments(id);
+                        for (CommentResponse commentResponse : getCommentsResponse.getData()
+                                ) {
+                            Comment comment = new Comment(commentResponse);
+                            comment.setImageId(id);
+                            RealmController.with(getActivity()).addComment(comment);
+                        }
+                        getComments();
+                        break;
                     }
-                    getComments();
+                    default: {
+                        getComments();
+                    }
                 }
             }
 
             @Override
-            public void onFailure(Call<GetCommentsResponse> call, Throwable t) {
+            public void onError(Throwable t) {
                 getComments();
             }
         });
     }
-    public void getComments(){
-        mComments.clear();
-        mComments.addAll(RealmController.with(getActivity()).getComments(mImage.getID()));
-        mCommentAdapter.notifyDataSetChanged();
-        mRecyclerView.scrollToPosition(mComments.size()-1);
+
+    public void getComments() {
+        if (mCommentAdapter.isLoading()) mCommentAdapter.setLoading(false);
+        List<Comment> new_comments = RealmController.with(getActivity()).getComments(mImage.getID(), cur_page);
+        mComments.addAll(new_comments);
+        if (new_comments.size() == COMMENTS_PER_PAGE) {
+            cur_page++;
+        } else mCommentAdapter.setLastPage(true);
+        mCommentAdapter.notifyItemRangeInserted(mComments.size() - new_comments.size(), new_comments.size());
+
 
     }
 }

@@ -17,6 +17,17 @@ public class Comment extends RealmObject {
     private int ID;
     private int imageId;
 
+    public Comment(CommentResponse commentResponse) {
+        this.ID = commentResponse.getId();
+        this.text = commentResponse.getText();
+        this.date = commentResponse.getDate();
+
+    }
+
+    public Comment() {
+
+    }
+
     public String getText() {
         return text;
     }
@@ -47,16 +58,5 @@ public class Comment extends RealmObject {
 
     public void setID(int ID) {
         this.ID = ID;
-    }
-
-    public Comment(CommentResponse commentResponse) {
-        this.ID = commentResponse.getId();
-        this.text = commentResponse.getText();
-        this.date = commentResponse.getDate();
-
-    }
-
-    public Comment() {
-
     }
 }

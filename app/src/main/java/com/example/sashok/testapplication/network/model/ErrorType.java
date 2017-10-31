@@ -35,6 +35,18 @@ public enum ErrorType {
      */
     UNKNOWN(Integer.MAX_VALUE, true, R.string.network_error);
 
+    private final int code;
+    private final boolean system;
+    private final int defaultErrorMessage;
+    ErrorType(int code, boolean system, int message) {
+        this.code = code;
+        this.system = system;
+        if (message == 0) {
+            message = R.string.network_error;
+        }
+        this.defaultErrorMessage = message;
+    }
+
     public static ErrorType getType(int value) {
         ErrorType[] values = values();
         for (ErrorType errorType : values) {
@@ -43,19 +55,6 @@ public enum ErrorType {
             }
         }
         return UNKNOWN;
-    }
-
-    private final int code;
-    private final boolean system;
-    private final int defaultErrorMessage;
-
-    ErrorType(int code, boolean system, int message) {
-        this.code = code;
-        this.system = system;
-        if (message == 0) {
-            message = R.string.network_error;
-        }
-        this.defaultErrorMessage = message;
     }
 
     /**
