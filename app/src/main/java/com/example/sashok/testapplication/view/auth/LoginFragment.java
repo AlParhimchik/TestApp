@@ -96,8 +96,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     }
 
     public void endSigning() {
-        login_btn.setVisibility(View.VISIBLE);
-        mProgressBar.setVisibility(View.GONE);
+        if (login_btn!=null) login_btn.setVisibility(View.VISIBLE);
+        if (mProgressBar!=null) mProgressBar.setVisibility(View.GONE);
     }
 
     public boolean validate() {
@@ -121,4 +121,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         return true;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        endSigning();
+
+    }
 }

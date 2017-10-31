@@ -131,10 +131,15 @@ public class RegistrationFragment extends Fragment implements View.OnClickListen
     }
 
     public void endSigning() {
-        signup_btn.setVisibility(View.VISIBLE);
-        mProgressBar.setVisibility(View.GONE);
+        if (signup_btn!=null) signup_btn.setVisibility(View.VISIBLE);
+        if (mProgressBar!=null) mProgressBar.setVisibility(View.GONE);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        endSigning();
+    }
 }
 
 
